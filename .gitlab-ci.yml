@@ -1,0 +1,37 @@
+######################################
+#   RENAME FILE TO: .gitlab-ci.yml   #
+######################################
+
+
+stages:
+  - build
+  - deploy
+
+variables:
+  TEAM_NUMBER: team2                  # please change according to your team
+  AWS_DEFAULT_REGION: eu-central-1
+  BUCKET_NAME: iaa2019-hackathon-apps
+
+#buildApp:
+#  image: node:10.16.3-alpine
+#  stage: build
+#  script:
+#    - npm build
+
+deploys3:
+  image: "xueshanf/awscli"
+  stage: deploy
+  script:
+    - aws s3 cp app/ s3://${BUCKET_NAME}/apps/${TEAM_NUMBER} --recursive
+  only:
+    - master
+
+clean_s3:
+  image: "xueshanf/awscli"
+  stage: deploy
+  script:
+    - aws s3 rm s3://${BUCKET_NAME}/apps/${TEAM_NUMBER} --recursive
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}
+    action: stop
+  when: manual
